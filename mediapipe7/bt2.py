@@ -1,3 +1,7 @@
+#Đọc ảnh bằng OpenCV
+#Dùng MediaPipe detect landmark bàn tay
+#Vẽ các điểm landmark lên ảnh
+#Hiển thị kết quả lên màn hình
 import cv2
 import mediapipe as mp
 
