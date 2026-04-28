@@ -8,6 +8,7 @@ __pycache__/
 # Virtual environments
 # =========================
 mediapipe10/
+VirtualMouse/
 venv/
 .venv/
 env/
