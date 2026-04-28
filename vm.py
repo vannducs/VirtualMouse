@@ -26,19 +26,16 @@ while True:
             mpd.draw_landmarks(frame, hand_landmarks, mph.HAND_CONNECTIONS)
             lm4 = hand_landmarks.landmark[4]
             lm8 = hand_landmarks.landmark[8]
-            #Lay toa do ngon cai, tro
             lm4x, lm4y = int(lm4.x*w), int(lm4.y*h)
             lm8x, lm8y = int(lm8.x*w), int(lm8.y*h)
-            #ve màu tím và đường thẳng giữa 2 ngón
             cv2.circle(frame, (lm4x,lm4y),5,(255,0,255),-1)
             cv2.circle(frame, (lm8x,lm8y),5,(255,0,255),-1)
             cv2.line(frame, (lm8x, lm8y), (lm4x, lm4y), (0,255,0), 2)
-            #click, khi click thì ko di chuyển chuột
             dist = ((lm8x-lm4x)**2 + (lm8y-lm4y)**2)**0.5
             if dist <30:
                 if time.time()-time_clicked > 0.5:
                     pyautogui.click()
-                    print("click")
+                    cv2.putText(frame, "CLICK!",(w//2,h//2),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
                     time_clicked = time.time()
             else:
                 screen_8x= int(np.interp(lm8x, [0,w],[0,screen_w]))
