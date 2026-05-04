@@ -1,6 +1,7 @@
 # Hi!
 Code chính sẽ ở trong folder **VirtualMouse**
 chạy dự án bằng python vm_gui.py
+code không kèm giao diện ở vm.py
 ## ===== Lưu ý =====
 Chạy bằng **VSCode ở trong Anaconda** và bắt buộc dùng **Python 3.8**
 Nhất định phải là python 3.8 nha
