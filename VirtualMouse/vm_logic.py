@@ -10,9 +10,6 @@ screen_w, screen_h = pyautogui.size()
 pyautogui.FAILSAFE  = False
 time_clicked        = 0
 
-def gap(hand_landmarks, tip, pip):
-    return hand_landmarks.landmark[tip].y > hand_landmarks.landmark[pip].y
-
 def process(frame):
     global time_clicked
 
@@ -45,11 +42,15 @@ def process(frame):
             cv2.circle(frame, (lm8x,  lm8y),  10, (255,0,255), -1)
             cv2.circle(frame, (lm20x, lm20y), 10, (255,0,255), -1)
             cv2.line(frame, (lm8x,lm8y), (lm4x,lm4y), (0,255,0), 2)
+            cv2.line(frame, (lm4x,lm4y), (lm20x,lm20y), (0,255,0), 2)
 
-            tro_gap      = gap(hand_landmarks, 8,  6)
-            giua_gap     = gap(hand_landmarks, 12, 10)
-            aput_gap     = gap(hand_landmarks, 16, 14)
-            ut_gap       = gap(hand_landmarks, 20, 18)
+            def gap(tip, pip):
+                return hand_landmarks.landmark[tip].y > hand_landmarks.landmark[pip].y
+            
+            tro_gap      = gap(8,  6)
+            giua_gap     = gap(12, 10)
+            aput_gap     = gap(16, 14)
+            ut_gap       = gap(20, 18)
             bon_ngon_gap = tro_gap and giua_gap and aput_gap and ut_gap
 
             like    = lm4.y < hand_landmarks.landmark[2].y

@@ -53,7 +53,7 @@ while True:
             dislike = lm4.y > hand_landmarks.landmark[2].y
 
             dist_cai_tro = ((lm8x-lm4x)**2  + (lm8y-lm4y)**2)**0.5
-            dist_cai_ut  = ((lm20x-lm8x)**2 + (lm20y-lm8y)**2)**0.5  
+            dist_cai_ut  = ((lm20x-lm4x)**2 + (lm20y-lm4y)**2)**0.5  
 
             if dist_cai_tro < 30:  
                 if time.time()-time_clicked > 0.5:

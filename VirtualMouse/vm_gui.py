@@ -3,7 +3,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import threading
 import time
-from VirtualMouse.vm_logic import process
+from vm_logic import process
 
 # ─── Tkinter setup ─────────────────────────────────────────────────
 root = tk.Tk()
