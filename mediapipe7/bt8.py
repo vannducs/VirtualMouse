@@ -6,6 +6,7 @@
 #điều khiển chuột máy tính bằng ngón trỏ
 #click khi ngón trỏ chạm ngón cái, khi click thì ko di chuyển chuột,
 #scroll lên khi like, scroll xuống khi dislike
+#click chuột phải khi ngón trỏ chạm ngón út
 #Hiển thị video kết quả lên màn hình
 import cv2, pyautogui, time
 import mediapipe as mp
@@ -22,6 +23,7 @@ screen_w, screen_h = pyautogui.size()
 
 cap = cv2.VideoCapture(0)
 fps = cap.get(cv2.CAP_PROP_FPS)
+
 while True:
     ret, frame = cap.read()
     if not ret: break
@@ -35,9 +37,11 @@ while True:
             mpd.draw_landmarks(frame, hand_landmarks, mph.HAND_CONNECTIONS)
             lm4 = hand_landmarks.landmark[4]
             lm8 = hand_landmarks.landmark[8]
+            lm20 = hand_landmarks.landmark[20]
 
             lm4x, lm4y = int(lm4.x*w), int(lm4.y*h)
             lm8x, lm8y = int(lm8.x*w), int(lm8.y*h)
+            lm20x, lm20y = int(lm20.x*w), int(lm20.y*h)
             #xử lý gập ngón
             lm12y = hand_landmarks.landmark[12].y*h
             lm16y = hand_landmarks.landmark[16].y*h
@@ -57,11 +61,18 @@ while True:
             cv2.putText(frame,f"Cai: ({lm4x},{lm4y})",(100,100),cv2.FONT_HERSHEY_SIMPLEX,0.7,(255,255,255),2)
             cv2.putText(frame,f"Tro: ({lm8x},{lm8y})",(100,130),cv2.FONT_HERSHEY_SIMPLEX,0.7,(255,255,255),2)
             
-            dist = ((lm8x-lm4x)**2 + (lm8y-lm4y)**2)**0.5
-            if dist<30:
+            dist_4_8 = ((lm8x-lm4x)**2 + (lm8y-lm4y)**2)**0.5
+            dist_4_20 = ((lm20x-lm4x)**2 + (lm20y-lm4y)**2)**0.5
+            if dist_4_8<30:
                 if time.time()-time_clicked > 0.5:
                     pyautogui.leftClick()
-                    cv2.putText(frame, "CLICK!",(w//2,h//2),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+                    cv2.putText(frame, "LEFTCLICK!",(w//2,h//2),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+                    time_clicked=time.time()
+            
+            if dist_4_20<30:
+                if time.time()-time_clicked >0.5:
+                    pyautogui.rightClick()
+                    cv2.putText(frame, "RIGHTCLICK!",(w//2,h//2),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
                     time_clicked=time.time()
 
             elif like:
@@ -81,5 +92,4 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
 

@@ -28,9 +28,11 @@ while True:
             lm8 = hand_landmarks.landmark[8]
             lm4x, lm4y = int(lm4.x*w), int(lm4.y*h)
             lm8x, lm8y = int(lm8.x*w), int(lm8.y*h)
+
             cv2.circle(frame, (lm4x,lm4y),5,(255,0,255),-1)
             cv2.circle(frame, (lm8x,lm8y),5,(255,0,255),-1)
             cv2.line(frame, (lm8x, lm8y), (lm4x, lm4y), (0,255,0), 2)
+            
             dist = ((lm8x-lm4x)**2 + (lm8y-lm4y)**2)**0.5
             if dist <30:
                 if time.time()-time_clicked > 0.5:
