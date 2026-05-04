@@ -49,12 +49,10 @@ def process(frame):
             cv2.line(frame, (lm4x,lm4y),  (lm20x,lm20y), (0,255,0), 2)
             cv2.line(frame, (lm8x,lm8y),  (lm12x,lm12y), (0,255,0), 2)
 
-            # Khoảng cách
             dist_cai_tro  = ((lm8x-lm4x)**2  + (lm8y-lm4y)**2)**0.5
             dist_cai_ut   = ((lm20x-lm4x)**2 + (lm20y-lm4y)**2)**0.5
             dist_tro_giua = ((lm12x-lm8x)**2 + (lm12y-lm8y)**2)**0.5
 
-            # Ưu tiên: click trái > click phải > scroll > di chuyển
             if dist_cai_tro < 30:
                 if time.time()-time_clicked > 0.5:
                     pyautogui.leftClick()

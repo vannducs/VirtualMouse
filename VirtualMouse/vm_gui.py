@@ -3,6 +3,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import threading
 import time
+import queue
 from vm_logic import process
 
 # ─── Tkinter setup ─────────────────────────────────────────────────
@@ -36,7 +37,6 @@ frame_right.pack_propagate(False)
 canvas = tk.Canvas(frame_left, width=480, height=360,
                    bg="black", highlightthickness=0)
 canvas.pack()
-
 # ─── Panel phải ────────────────────────────────────────────────────
 tk.Label(frame_right, text="VIRTUAL MOUSE",
          font=FONT_TITLE, bg=PANEL, fg=ACCENT).pack(pady=(14,4))
@@ -96,15 +96,16 @@ dist_var = tk.StringVar(value="--")
 tk.Label(dist_frame, textvariable=dist_var,
          font=FONT_NORMAL, bg=PANEL, fg=DIM).pack(side=tk.LEFT)
 
-# ─── Webcam loop trong thread riêng ────────────────────────────────
-running   = True
-prev_time = time.time()
+# ─── Queue truyền frame từ thread → main thread ────────────────────
+frame_queue = queue.Queue(maxsize=1)
+running     = True
+prev_time   = time.time()
 
+# ─── Thread webcam ─────────────────────────────────────────────────
 def update():
     global prev_time, running
 
     vcap = cv2.VideoCapture(0)
-
     while running:
         ret, frame = vcap.read()
         if not ret: break
@@ -120,6 +121,26 @@ def update():
         # Gọi logic
         frame, data = process(frame)
 
+        # Đẩy vào queue
+        if not frame_queue.full():
+            frame_queue.put((frame, data))
+
+    vcap.release()
+
+# ─── Cập nhật UI từ main thread ────────────────────────────────────
+COLORS = {
+    "LEFT CLICK":  RED,
+    "RIGHT CLICK": "#f97316",
+    "SCROLL UP":   GREEN,
+    "SCROLL DOWN": "#3b82f6",
+    "MOVING":      GREEN,
+    "WAITING":     YELLOW,
+}
+
+def refresh_ui():
+    if not frame_queue.empty():
+        frame, data = frame_queue.get()
+
         # Cập nhật panel
         if data["found"]:
             cai_x.set(str(data["lm4x"]))
@@ -128,22 +149,12 @@ def update():
             tro_y.set(str(data["lm8y"]))
             dist_var.set(f"{data['dist']} px")
             mode_var.set(data["mode"])
-
-            # Màu theo mode
-            colors = {
-                "LEFT CLICK":   RED,
-                "RIGHT CLICK":  "#f97316",
-                "SCROLL UP":    GREEN,
-                "SCROLL DOWN":  "#3b82f6",
-                "DI CHUYEN":    GREEN,
-                "WAITING":      YELLOW,
-            }
-            mode_label.config(fg=colors.get(data["mode"], YELLOW))
+            mode_label.config(fg=COLORS.get(data["mode"], YELLOW))
         else:
             mode_var.set("WAITING")
             mode_label.config(fg=YELLOW)
 
-        # Hiển thị webcam lên canvas
+        # Cập nhật canvas
         frame_rgb   = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_small = cv2.resize(frame_rgb, (480, 360))
         img         = Image.fromarray(frame_small)
@@ -151,7 +162,7 @@ def update():
         canvas.imgtk = imgtk
         canvas.create_image(0, 0, anchor=tk.NW, image=imgtk)
 
-    vcap.release()
+    root.after(15, refresh_ui)  # gọi lại sau 15ms
 
 # ─── Đóng chương trình ─────────────────────────────────────────────
 def on_close():
@@ -165,8 +176,8 @@ def on_key(event):
 
 # ─── Cố định góc phải trên màn hình ───────────────────────────────
 root.update_idletasks()
-screen_w  = root.winfo_screenwidth()
-win_w     = root.winfo_width()
+screen_w = root.winfo_screenwidth()
+win_w    = root.winfo_width()
 root.geometry(f"+{screen_w - win_w - 10}+10")
 root.attributes("-topmost", True)
 
@@ -174,8 +185,9 @@ root.attributes("-topmost", True)
 root.protocol("WM_DELETE_WINDOW", on_close)
 root.bind("<Key>", on_key)
 
-# ─── Chạy thread webcam ────────────────────────────────────────────
+# ─── Khởi động ─────────────────────────────────────────────────────
 t = threading.Thread(target=update, daemon=True)
 t.start()
 
+refresh_ui()       # ✅ bắt đầu vòng lặp UI từ main thread
 root.mainloop()
