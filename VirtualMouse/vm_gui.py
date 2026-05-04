@@ -3,7 +3,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import threading
 import time
-from virtualmouse import process  
+from VirtualMouse.vm_logic import process
 
 # ─── Tkinter setup ─────────────────────────────────────────────────
 root = tk.Tk()
@@ -96,7 +96,7 @@ dist_var = tk.StringVar(value="--")
 tk.Label(dist_frame, textvariable=dist_var,
          font=FONT_NORMAL, bg=PANEL, fg=DIM).pack(side=tk.LEFT)
 
-# ─── Webcam loop trong thread riêng ───────────────────────────────
+# ─── Webcam loop trong thread riêng ────────────────────────────────
 running   = True
 prev_time = time.time()
 
@@ -117,7 +117,7 @@ def update():
         prev_time = now
         fps_var.set(f"{fps_val:.1f}")
 
-        # Gọi logic ✅
+        # Gọi logic
         frame, data = process(frame)
 
         # Cập nhật panel
@@ -128,7 +128,17 @@ def update():
             tro_y.set(str(data["lm8y"]))
             dist_var.set(f"{data['dist']} px")
             mode_var.set(data["mode"])
-            mode_label.config(fg=RED if data["mode"]=="CLICK" else GREEN)
+
+            # Màu theo mode
+            colors = {
+                "LEFT CLICK":   RED,
+                "RIGHT CLICK":  "#f97316",
+                "SCROLL UP":    GREEN,
+                "SCROLL DOWN":  "#3b82f6",
+                "DI CHUYEN":    GREEN,
+                "WAITING":      YELLOW,
+            }
+            mode_label.config(fg=colors.get(data["mode"], YELLOW))
         else:
             mode_var.set("WAITING")
             mode_label.config(fg=YELLOW)
@@ -143,14 +153,28 @@ def update():
 
     vcap.release()
 
+# ─── Đóng chương trình ─────────────────────────────────────────────
 def on_close():
     global running
     running = False
     root.destroy()
 
-root.protocol("WM_DELETE_WINDOW", on_close)
+def on_key(event):
+    if event.char == "q":
+        on_close()
 
-# Chạy thread webcam
+# ─── Cố định góc phải trên màn hình ───────────────────────────────
+root.update_idletasks()
+screen_w  = root.winfo_screenwidth()
+win_w     = root.winfo_width()
+root.geometry(f"+{screen_w - win_w - 10}+10")
+root.attributes("-topmost", True)
+
+# ─── Bind sự kiện ──────────────────────────────────────────────────
+root.protocol("WM_DELETE_WINDOW", on_close)
+root.bind("<Key>", on_key)
+
+# ─── Chạy thread webcam ────────────────────────────────────────────
 t = threading.Thread(target=update, daemon=True)
 t.start()
 
