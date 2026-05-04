@@ -30,30 +30,22 @@ while True:
 
             lm4  = hand_landmarks.landmark[4]
             lm8  = hand_landmarks.landmark[8]
+            lm12 = hand_landmarks.landmark[12]
             lm20 = hand_landmarks.landmark[20]
 
             lm4x,  lm4y  = int(lm4.x*w),  int(lm4.y*h)
             lm8x,  lm8y  = int(lm8.x*w),  int(lm8.y*h)
+            lm12x, lm12y = int(lm12.x*w), int(lm12.y*h)
             lm20x, lm20y = int(lm20.x*w), int(lm20.y*h)
 
             cv2.circle(frame, (lm4x,  lm4y),  10, (255,0,255), -1)
             cv2.circle(frame, (lm8x,  lm8y),  10, (255,0,255), -1)
+            cv2.circle(frame, (lm12x, lm12y), 10, (255,0,255), -1)
             cv2.circle(frame, (lm20x, lm20y), 10, (255,0,255), -1)
 
-            def gap(tip, pip):
-                return hand_landmarks.landmark[tip].y > hand_landmarks.landmark[pip].y  
-
-            tro_gap      = gap(8,  6)
-            giua_gap     = gap(12, 10)
-            aput_gap     = gap(16, 14)
-            ut_gap       = gap(20, 18)
-            bon_ngon_gap = tro_gap and giua_gap and aput_gap and ut_gap
-
-            like    = lm4.y < hand_landmarks.landmark[2].y
-            dislike = lm4.y > hand_landmarks.landmark[2].y
-
             dist_cai_tro = ((lm8x-lm4x)**2  + (lm8y-lm4y)**2)**0.5
-            dist_cai_ut  = ((lm20x-lm4x)**2 + (lm20y-lm4y)**2)**0.5  
+            dist_cai_ut  = ((lm20x-lm4x)**2 + (lm20y-lm4y)**2)**0.5 
+            dist_tro_giua = ((lm12x-lm8x)**2 + (lm12y-lm8y)**2)**0.5
 
             if dist_cai_tro < 30:  
                 if time.time()-time_clicked > 0.5:
@@ -68,22 +60,21 @@ while True:
                     time_clicked = time.time()
                 cv2.putText(frame, "RIGHT CLICK", (10,30),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,165,255), 2)
-
-            elif bon_ngon_gap and like:  
-                pyautogui.scroll(5)
-                cv2.putText(frame, "SCROLL UP", (10,30),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-
-            elif bon_ngon_gap and dislike:  
-                pyautogui.scroll(-5)
-                cv2.putText(frame, "SCROLL DOWN", (10,30),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
+                
+            elif dist_tro_giua < 20:
+                if lm8y and lm4y < h//2:
+                    pyautogui.scroll(10)
+                    cv2.putText(frame, "SCROLL UP", (10,30),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
+                if lm8y and lm4y > h//2:
+                    pyautogui.scroll(-10)
+                    cv2.putText(frame, "SCROLL DOWN", (10,30),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
 
             else:  
-                if not tro_gap:
-                    sx = int(np.interp(lm8x, [0,w], [0,screen_w]))
-                    sy = int(np.interp(lm8y, [0,h], [0,screen_h]))
-                    pyautogui.moveTo(sx, sy, duration=0.05)
+                sx = int(np.interp(lm8x, [0,w], [0,screen_w]))
+                sy = int(np.interp(lm8y, [0,h], [0,screen_h]))
+                pyautogui.moveTo(sx, sy, duration=0.05)
                 cv2.putText(frame, "MOVING", (10,30),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
 
