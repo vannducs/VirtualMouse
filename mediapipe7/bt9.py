@@ -53,7 +53,7 @@ while True:
             dislike = lm4.y > hand_landmarks.landmark[2].y
 
             dist_cai_tro = ((lm8x-lm4x)**2  + (lm8y-lm4y)**2)**0.5
-            dist_tro_ut  = ((lm8x-lm20x)**2 + (lm8y-lm20y)**2)**0.5  
+            dist_cai_ut  = ((lm20x-lm8x)**2 + (lm20y-lm8y)**2)**0.5  
 
             if dist_cai_tro < 30:  
                 if time.time()-time_clicked > 0.5:
@@ -62,7 +62,7 @@ while True:
                 cv2.putText(frame, "LEFT CLICK", (10,30),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
 
-            elif dist_tro_ut < 30:  
+            elif dist_cai_ut < 30:  
                 if time.time()-time_clicked > 0.5:
                     pyautogui.rightClick()
                     time_clicked = time.time()
