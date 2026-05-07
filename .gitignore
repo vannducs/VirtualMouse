@@ -42,5 +42,5 @@ dist/
 # =========================
 .env
 
-test.py/
-vm.py/
+test.py
+vm.py
