@@ -41,3 +41,6 @@ dist/
 # Secrets
 # =========================
 .env
+
+test.py/
+vm.py/
